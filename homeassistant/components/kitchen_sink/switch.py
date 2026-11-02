@@ -26,6 +26,7 @@ async def async_setup_entry(
         "n_ch_power_strip",
         {"number_of_sockets": "2"},
         "2_ch_power_strip",
+        model="2-socket power strip",
     )
 
     parent_device_id = dr.async_get_device_id_by_identifier(
@@ -48,6 +49,7 @@ async def async_setup_entry(
         {"number_of_sockets": "2"},
         "2_ch_power_strip_via_hub",
         via_device_id=power_strip_hub.id,
+        model="2-socket power strip",
     )
 
     async_add_entities(

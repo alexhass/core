@@ -81,7 +81,7 @@ EVENT_DEVICE_REGISTRY_UPDATED: EventType[EventDeviceRegistryUpdatedData] = Event
 )
 STORAGE_KEY = "core.device_registry"
 STORAGE_VERSION_MAJOR = 3
-STORAGE_VERSION_MINOR = 4
+STORAGE_VERSION_MINOR = 5
 
 CLEANUP_DELAY = 10
 
@@ -699,6 +699,11 @@ class DeviceEntry(BaseDeviceEntry):
     has_composite_identifiers: bool = attr.ib(default=False)
     serial_number: str | None = attr.ib(default=None)
     sw_version: str | None = attr.ib(default=None)
+    # The translation key and placeholders the integration registered the device with,
+    # so the frontend can translate its model and manufacturer in the user's language.
+    # The model and manufacturer themselves are stored as passed.
+    translation_key: str | None = attr.ib(default=None)
+    translation_placeholders: Mapping[str, str] | None = attr.ib(default=None)
     via_device_id: str | None = attr.ib(default=None)
     # Transient pending move target (config_entry_id, config_subentry_id) initiated by
     # add_config_entry_id and completed by a subsequent remove_config_entry_id. It is
@@ -787,6 +792,8 @@ class DeviceEntry(BaseDeviceEntry):
             "primary_config_entry": self.config_entry_id,
             "serial_number": self.serial_number,
             "sw_version": self.sw_version,
+            "translation_key": self.translation_key,
+            "translation_placeholders": self.translation_placeholders,
             "via_device_id": self.via_device_id,
         }
 
@@ -822,6 +829,8 @@ class DeviceEntry(BaseDeviceEntry):
                 "primary_config_entry": self.config_entry_id,
                 "serial_number": self.serial_number,
                 "sw_version": self.sw_version,
+                "translation_key": self.translation_key,
+                "translation_placeholders": self.translation_placeholders,
                 "via_device_id": self.via_device_id,
             }
         )
@@ -1400,6 +1409,12 @@ class DeviceRegistryStore(storage.Store[dict[str, list[dict[str, Any]]]]):
         if old_major_version < 3 or (old_major_version == 3 and old_minor_version < 4):
             # Version 3.4 adds child devices, introduced in 2026.9
             old_data.setdefault("child_devices", [])
+
+        if old_major_version < 3 or (old_major_version == 3 and old_minor_version < 5):
+            # Version 3.5 stores the translation key and placeholders of devices
+            for device in old_data["devices"]:
+                device["translation_key"] = None
+                device["translation_placeholders"] = None
 
         if old_major_version > 3:
             raise NotImplementedError
@@ -2614,6 +2629,14 @@ class DeviceRegistry(BaseRegistry[dict[str, list[dict[str, Any]]]]):
         name = self._resolve_device_info_name(config_entry, device_info)
         entry_type = device_info.entry_type
         suggested_area = device_info.suggested_area
+        translation_key = device_info.translation_key
+        if translation_key is not Undefined:
+            translation_key = translation_key or None
+        translation_placeholders = device_info.translation_placeholders
+        if translation_placeholders is not Undefined:
+            translation_placeholders = (
+                dict(translation_placeholders) if translation_placeholders else None
+            )
 
         _validate_device_info(config_entry, device_info)
 
@@ -2842,6 +2865,8 @@ class DeviceRegistry(BaseRegistry[dict[str, list[dict[str, Any]]]]):
             name=name,
             has_composite_identifiers=has_composite_identifiers,
             new_config_subentry_id=config_subentry_id,
+            translation_key=translation_key,
+            translation_placeholders=translation_placeholders,
             via_device_id=via_device_id,
             **identifiers_connections,
             **validated_fields,
@@ -3304,6 +3329,8 @@ class DeviceRegistry(BaseRegistry[dict[str, list[dict[str, Any]]]]):
         remove_config_subentry_id: str | Undefined | None = Undefined,
         serial_number: str | Undefined | None = Undefined,
         sw_version: str | Undefined | None = Undefined,
+        translation_key: str | Undefined | None = Undefined,
+        translation_placeholders: Mapping[str, str] | Undefined | None = Undefined,
         via_device_id: str | Undefined | None = Undefined,
     ) -> DeviceEntry | None:
         """Private update device attributes.
@@ -3706,6 +3733,8 @@ class DeviceRegistry(BaseRegistry[dict[str, list[dict[str, Any]]]]):
             ("has_composite_identifiers", has_composite_identifiers),
             ("serial_number", serial_number),
             ("sw_version", sw_version),
+            ("translation_key", translation_key),
+            ("translation_placeholders", translation_placeholders),
             ("via_device_id", via_device_id),
         ):
             if value is not Undefined and value != getattr(old, attr_name):
@@ -4524,6 +4553,8 @@ class DeviceRegistry(BaseRegistry[dict[str, list[dict[str, Any]]]]):
                     has_composite_identifiers=device["has_composite_identifiers"],
                     serial_number=device["serial_number"],
                     sw_version=device["sw_version"],
+                    translation_key=device["translation_key"],
+                    translation_placeholders=device["translation_placeholders"],
                     via_device_id=device["via_device_id"],
                 )
 

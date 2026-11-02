@@ -344,6 +344,8 @@ SAMPLE_STRINGS = {
             "name": "Main device",
         },
         "secondary_device": {
+            "manufacturer": "Example vendor",
+            "model": "Wireless sensor {variant}",
             "name": "Secondary device",
         },
     },

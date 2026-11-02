@@ -14,12 +14,14 @@ def async_create_device(
     device_translation_placeholders: dict[str, str] | None,
     unique_id: str,
     via_device_id: str | None = None,
+    model: str | None = None,
 ) -> dr.DeviceEntry:
     """Create a device."""
     device_registry = dr.async_get(hass)
     return device_registry.async_get_or_create(
         config_entry_id=config_entry_id,
         identifiers={(DOMAIN, unique_id)},
+        model=model,
         name=device_name,
         translation_key=device_translation_key,
         translation_placeholders=device_translation_placeholders,

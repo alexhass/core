@@ -90,12 +90,16 @@
     'labels': set({
     }),
     'manufacturer': None,
-    'model': None,
+    'model': '2-socket power strip',
     'model_id': None,
     'name': 'Power strip with 2 sockets',
     'name_by_user': None,
     'serial_number': None,
     'sw_version': None,
+    'translation_key': 'n_ch_power_strip',
+    'translation_placeholders': dict({
+      'number_of_sockets': '2',
+    }),
     'via_device_id': None,
   })
 # ---
@@ -190,12 +194,16 @@
     'labels': set({
     }),
     'manufacturer': None,
-    'model': None,
+    'model': '2-socket power strip',
     'model_id': None,
     'name': 'Power strip with 2 sockets',
     'name_by_user': None,
     'serial_number': None,
     'sw_version': None,
+    'translation_key': 'n_ch_power_strip',
+    'translation_placeholders': dict({
+      'number_of_sockets': '2',
+    }),
     'via_device_id': None,
   })
 # ---

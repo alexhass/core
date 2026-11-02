@@ -55,6 +55,7 @@
   },
   "device": {
     "n_ch_power_strip": {
+      "model": "{number_of_sockets}-socket power strip",
       "name": "Power strip with {number_of_sockets} sockets"
     }
   },
